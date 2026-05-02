@@ -881,6 +881,47 @@ textarea:focus {
   font-size: 14px;
 }
 
+/* Оффскрин-разметка для генерации PDF (html2canvas) */
+.pdf-export {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: #122039;
+  line-height: 1.5;
+  background: #fff;
+}
+
+.pdf-export .pdf-export-title {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.pdf-export .pdf-export-meta {
+  margin: 0 0 22px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #d6e0f1;
+  font-size: 13px;
+  color: #657493;
+}
+
+.pdf-export .result-content {
+  margin-top: 0;
+}
+
+.pdf-export details.positives-block {
+  display: block;
+}
+
+.pdf-export details.positives-block summary {
+  display: block;
+  margin-bottom: 8px;
+  list-style: none;
+}
+
+.pdf-export details.positives-block summary::-webkit-details-marker {
+  display: none;
+}
+
 @media print {
   body * {
     visibility: hidden;

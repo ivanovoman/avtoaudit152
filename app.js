@@ -6,6 +6,33 @@ const ANTHROPIC_API_KEY = typeof window !== "undefined" ? window.PDN_ANTHROPIC_A
 
 const CLAUDE_MODEL = "claude-sonnet-4-20250514";
 
+/** Текст промпта из файла «Промпт_Аудит_ПДн_v2.1.doc» (в репозитории: prompts/audit-prompt-v2.1.txt). */
+const AUDIT_PROMPT_URL = "./prompts/audit-prompt-v2.1.txt";
+
+let auditPromptTemplateCache = null;
+let auditPromptLoadPromise = null;
+
+async function getAuditPromptTemplate() {
+  if (auditPromptTemplateCache) return auditPromptTemplateCache;
+  if (!auditPromptLoadPromise) {
+    auditPromptLoadPromise = fetch(AUDIT_PROMPT_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.text();
+      })
+      .then((text) => {
+        auditPromptTemplateCache = text;
+        return text;
+      })
+      .catch(() => {
+        auditPromptLoadPromise = null;
+        return null;
+      });
+  }
+  const t = await auditPromptLoadPromise;
+  return t;
+}
+
 const tabs = Array.from(document.querySelectorAll(".tab"));
 const modes = {
   files: document.getElementById("mode-files"),
@@ -466,36 +493,69 @@ async function runAiAudit(documentText, regexResults) {
     .map((r) => `- ${r.name} (${r.law})`)
     .join("\n");
 
-  const prompt = `Ты — эксперт по российскому законодательству в сфере персональных данных (152-ФЗ).
+  const checklistLines = regexResults.map((r) => `${r.status ? "✓" : "✗"} ${r.name} — ${r.law}`).join("\n");
 
-Тебе передан текст документа по ПДн и список несоответствий, найденных автоматической проверкой.
+  const todayRu = new Date().toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
-ТЕКСТ ДОКУМЕНТА (первые 4000 символов):
-${documentText.slice(0, 4000)}
+  const docSnippet = documentText.slice(0, 14000);
+  const documentsPlaceholder =
+    "фактическим текстом загруженного документа в разделе «ТЕКСТ ДОКУМЕНТА» ниже (это единственный первичный источник для выводов по содержанию; нормы 152-ФЗ и НПА — из твоей базы знаний)";
 
-НАЙДЕННЫЕ НЕСООТВЕТСТВИЯ:
-${failedChecks || "Автоматическая проверка не нашла нарушений"}
+  let instructions = await getAuditPromptTemplate();
+  if (!instructions || !instructions.trim()) {
+    instructions = `Ты — эксперт по 152-ФЗ и аудиту документов по ПДн. Сегодня: ${todayRu}. Следуй методологии: проверка соответствия политик/согласий требованиям закона, укажи нормы и рекомендации.`;
+  } else {
+    instructions = instructions
+      .replaceAll("{TODAY_DATE}", todayRu)
+      .replaceAll("{documents}", documentsPlaceholder);
+  }
 
-Задача:
-1. Подтверди или скорректируй найденные несоответствия на основе реального текста документа
-2. Найди дополнительные нарушения, которые пропустила автоматическая проверка
-3. Для каждого нарушения укажи: суть проблемы, норму закона, конкретную рекомендацию по исправлению
-4. Дай общую оценку: насколько документ соответствует требованиям РКН
+  const serviceNote =
+    "Контекст веб-сервиса: пользователь передал один объединённый текст (возможно из нескольких файлов). Блок «Проверка непротиворечивости» из промпта применяй, только если по тексту однозначно различимы два и более отдельных документа; иначе опиши возможные риски в overallAssessment.";
 
-Отвечай строго в формате JSON:
+  const jsonContract = `
+---
+ОТВЕТ ДЛЯ API (обязательно, только JSON, без markdown и без текста до/после):
+Сформируй результат аудита по методологии и классификации из инструкции выше. В полях JSON отрази суть отчёта (в т.ч. обязательные/рекомендованные/факультативные нарушения — в формулировках title/problem/recommendation).
+
 {
-  "overallAssessment": "краткая оценка 1-2 предложения",
-  "riskLevel": "low|medium|high",
+  "overallAssessment": "1–3 предложения: тип документа, общий вывод, при необходимости — системные риски",
+  "riskLevel": "low" | "medium" | "high",
   "issues": [
     {
-      "title": "название нарушения",
-      "law": "ст. X 152-ФЗ",
-      "problem": "описание проблемы",
-      "recommendation": "что конкретно добавить или изменить"
+      "title": "краткое название замечания",
+      "law": "норма (ст. … 152-ФЗ, НПА, КоАП при необходимости)",
+      "problem": "суть нарушения или недостатка, по возможности с отсылкой к фрагменту",
+      "recommendation": "конкретные шаги исправления"
     }
   ],
-  "positives": ["что в документе сделано правильно"]
-}`;
+  "positives": ["что в документе соответствует требованиям или сделано удачно"]
+}
+
+Если критичных замечаний нет, issues может быть []. Поле positives может быть [].`;
+
+  const prompt = `${instructions}
+
+${serviceNote}
+
+---
+АВТОМАТИЧЕСКАЯ ПРОВЕРКА (чек-лист сервиса, используй как ориентир):
+Несоответствия:
+${failedChecks || "не выявлены по чек-листу"}
+
+Все пункты чек-листа:
+${checklistLines}
+
+---
+ТЕКСТ ДОКУМЕНТА:
+${docSnippet}
+${documentText.length > 14000 ? "\n[… текст обрезан для API; учитывай доступный фрагмент …]" : ""}
+
+${jsonContract}`;
 
   if (!ANTHROPIC_API_KEY) {
     throw new Error("API_KEY_MISSING");
@@ -511,7 +571,8 @@ ${failedChecks || "Автоматическая проверка не нашла
     },
     body: JSON.stringify({
       model: CLAUDE_MODEL,
-      max_tokens: 2000,
+      max_tokens: 8192,
+      temperature: 0.1,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -741,8 +802,73 @@ async function runAudit() {
   }
 }
 
+function formatDateForPdfFilename() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+async function downloadReportAsPdf() {
+  if (resultContent.hidden) {
+    showToast("Сначала выполните проверку документа.");
+    return;
+  }
+
+  if (typeof html2pdf !== "function") {
+    showToast("Не удалось загрузить генератор PDF. Откроется окно печати.");
+    window.print();
+    return;
+  }
+
+  const mount = document.createElement("div");
+  mount.className = "pdf-export";
+  const head = document.createElement("div");
+  head.innerHTML = `<h1 class="pdf-export-title">PDn Audit — отчёт по 152-ФЗ</h1><p class="pdf-export-meta">Сформировано: ${new Date().toLocaleString("ru-RU")}</p>`;
+  mount.appendChild(head);
+
+  const clone = resultContent.cloneNode(true);
+  clone.removeAttribute("hidden");
+  clone.querySelector(".download-report-btn")?.remove();
+  clone.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+  const positivesDetails = clone.querySelector("details.positives-block");
+  if (positivesDetails && positivesDetails.querySelector("ul li")) {
+    positivesDetails.setAttribute("open", "");
+  }
+  mount.appendChild(clone);
+
+  mount.style.cssText =
+    "position:fixed;left:0;top:0;width:190mm;max-width:800px;padding:20px 24px;background:#fff;z-index:2147483646;opacity:0.01;pointer-events:none;overflow:visible;";
+
+  document.body.appendChild(mount);
+
+  const label = downloadReport.textContent;
+  downloadReport.disabled = true;
+  downloadReport.textContent = "Готовим PDF…";
+
+  try {
+    await html2pdf()
+      .set({
+        margin: [12, 12, 12, 12],
+        filename: `pdn-audit-${formatDateForPdfFilename()}.pdf`,
+        image: { type: "jpeg", quality: 0.94 },
+        html2canvas: { scale: 2, useCORS: true, logging: false, letterRendering: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+      })
+      .from(mount)
+      .save();
+    showToast("PDF сохранён.");
+  } catch (e) {
+    showToast("Не удалось сформировать PDF. Откроется печать — выберите «Сохранить как PDF».");
+    window.print();
+  } finally {
+    mount.remove();
+    downloadReport.disabled = false;
+    downloadReport.textContent = label;
+  }
+}
+
 downloadReport?.addEventListener("click", () => {
-  window.print();
+  downloadReportAsPdf();
 });
 
 function resetAll() {
