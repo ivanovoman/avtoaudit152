@@ -1,13 +1,253 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Аудит ПДн</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#316bff">
+  <meta name="description" content="Бесплатный аудит документов по ПДн (152-ФЗ): загрузка файла или текста, отчёт о нарушениях и рекомендации.">
+  <meta property="og:title" content="PDn Audit — аудит документов по 152-ФЗ">
+  <meta property="og:description" content="Проверка политик и согласий: оценка, замечания и рекомендации за минуты.">
+  <meta property="og:image" content="./images/og-image.svg">
+  <meta property="og:type" content="website">
+  <title>PDn Audit — аудит документов по 152-ФЗ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
+  <div class="page-glow" aria-hidden="true"></div>
 
-<h1>Аудит персональных данных (152-ФЗ)</h1>
-<p>Сайт запущен</p>
+  <header class="header container">
+    <a class="logo" href="#">
+      <span class="logo-mark">PDN</span>
+      <span>Audit 152-ФЗ</span>
+    </a>
+    <nav class="top-nav">
+      <a href="#how">Как работает</a>
+      <a href="#audit">Проверка</a>
+      <a href="#offer-anchor">Под ключ</a>
+    </nav>
+    <a class="btn btn-soft header-cta" href="#audit">Запустить проверку</a>
+  </header>
 
+  <main class="container">
+    <section class="hero">
+      <div class="hero-main">
+        <span class="tag">Аудит документов по 152-ФЗ</span>
+        <h1>Проверка документов по ПДн:<br>что не так и что исправить</h1>
+        <p class="hero-text">
+          Загрузите файл или вставьте текст политики, согласия или другого документа.
+          Получите отчёт с оценкой, замечаниями и рекомендациями.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="#audit">Проверить документ</a>
+          <a class="btn btn-soft" href="#how">Как это работает</a>
+        </div>
+        <div class="hero-points">
+          <span>✓ Без регистрации</span>
+          <span>✓ Форматы: PDF, DOCX, TXT</span>
+          <span>✓ Результат за несколько секунд</span>
+        </div>
+      </div>
+
+      <div class="hero-visual fade-in" aria-hidden="true">
+        <img src="./images/pdn.png"
+             alt=""
+             class="hero-img"
+             width="540" height="420">
+      </div>
+    </section>
+
+    <section id="how" class="section card">
+      <p class="eyebrow">Как это работает</p>
+      <h2>Четыре шага от файла к отчёту</h2>
+      <div class="steps-grid">
+        <article class="fade-in">
+          <div class="step-icon">
+            <img src="./images/step-upload.svg" alt="" width="40" height="40">
+          </div>
+          <span>01</span>
+          <h3>Передача данных</h3>
+          <p>Загрузите документ или вставьте текст с сайта вручную.</p>
+        </article>
+        <article class="fade-in">
+          <div class="step-icon">
+            <img src="./images/step-check.svg" alt="" width="40" height="40">
+          </div>
+          <span>02</span>
+          <h3>Проверка релевантности</h3>
+          <p>Если материал не про ПДн, сервис попросит корректный документ.</p>
+        </article>
+        <article class="fade-in">
+          <div class="step-icon">
+            <img src="./images/step-list.svg" alt="" width="40" height="40">
+          </div>
+          <span>03</span>
+          <h3>Проверка по критериям 152-ФЗ</h3>
+          <p>Быстрый разбор обязательных пунктов по чек-листу.</p>
+        </article>
+        <article class="fade-in">
+          <div class="step-icon">
+            <img src="./images/step-report.svg" alt="" width="40" height="40">
+          </div>
+          <span>04</span>
+          <h3>Детальные рекомендации</h3>
+          <p>Углублённый разбор формулировок и рисков с практическими советами.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="audit" class="audit-layout">
+      <div class="card panel input-panel">
+        <p class="eyebrow">Проверка</p>
+        <h2>Передайте документ</h2>
+        <p class="sub">Выберите способ и нажмите «Проверить документ».</p>
+
+        <div class="tabs" role="tablist" aria-label="Способ передачи данных">
+          <button type="button" class="tab active" data-mode="files" role="tab" aria-selected="true">Файлы</button>
+          <button type="button" class="tab" data-mode="text" role="tab" aria-selected="false">Текст</button>
+          <button type="button" class="tab" data-mode="url" role="tab" aria-selected="false">Сайт</button>
+        </div>
+
+        <div class="mode active" id="mode-files">
+          <div class="dropzone" id="dropzone" tabindex="0">
+            <h3>Перетащите документы сюда</h3>
+            <p>Или выберите файлы вручную. Можно несколько файлов сразу.</p>
+            <input
+              id="fileInput"
+              type="file"
+              multiple
+              accept=".txt,.pdf,.doc,.docx,.rtf,.odt,.html,.htm,.md,text/plain,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            >
+          </div>
+          <div id="fileList" class="file-list"></div>
+        </div>
+
+        <div class="mode" id="mode-text">
+          <label class="label" for="textInput">Текст документа</label>
+          <textarea id="textInput" placeholder="Вставьте текст политики, согласия, уведомления или регламента по ПДн"></textarea>
+        </div>
+
+        <div class="mode" id="mode-url">
+          <p class="url-notice">
+            Автоматически скачать страницу с другого сайта в браузере нельзя из‑за ограничений безопасности (CORS).
+            Скопируйте текст политики с сайта и вставьте во вкладку «Текст», либо сохраните документ как файл и загрузите во вкладку «Файлы».
+          </p>
+          <p class="hint">
+            <!-- TODO: заменить на вызов backend GET /api/fetch-url?target=URL для автоматического извлечения -->
+            Для продакшена: серверный эндпоинт загрузки URL и извлечения текста.
+          </p>
+          <label class="label" for="urlInput">Ссылка (скоро)</label>
+          <input id="urlInput" type="url" placeholder="https://example.ru/privacy" disabled aria-disabled="true">
+          <button type="button" class="btn btn-soft url-help-btn" id="urlHelpBtn">Как скопировать текст с сайта</button>
+          <details class="url-help" id="urlHelp">
+            <summary>Инструкция</summary>
+            <ol>
+              <li>Откройте страницу с политикой конфиденциальности на сайте.</li>
+              <li>Выделите текст (Ctrl+A на странице документа, если это отдельная страница).</li>
+              <li>Скопируйте (Ctrl+C) и вставьте во вкладку «Текст» здесь.</li>
+            </ol>
+          </details>
+        </div>
+
+        <div class="actions">
+          <button id="auditBtn" type="button" class="btn btn-primary">
+            <span class="btn-label">Проверить документ</span>
+          </button>
+          <button id="resetBtn" type="button" class="btn btn-soft">Очистить</button>
+        </div>
+
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      </div>
+
+      <div id="result" class="card panel result-panel">
+        <p class="eyebrow">Отчёт</p>
+        <h2>Результат проверки</h2>
+        <p class="sub">Оценка, замечания и что сделать дальше.</p>
+
+        <div class="progress" aria-hidden="true">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+        <div id="resultPlaceholder" class="result-placeholder muted">
+          Добавьте материал слева и нажмите «Проверить документ».
+        </div>
+
+        <div id="resultContent" class="result-content" hidden>
+          <div id="resultSummary" class="result-summary" hidden>
+            <div class="result-summary-icon" aria-hidden="true">📋</div>
+            <div class="result-summary-body">
+              <div class="result-summary-top">
+                <span id="resultViolationsLine" class="result-violations-line"></span>
+                <span id="resultScore" class="result-score" aria-label="Оценка по чек-листу"></span>
+              </div>
+              <p id="resultAssessment" class="result-assessment"></p>
+              <p id="aiUnavailableNote" class="ai-fallback-note" hidden></p>
+            </div>
+          </div>
+
+          <details id="positivesBlock" class="positives-block" hidden>
+            <summary id="positivesSummary">Что в порядке</summary>
+            <ul id="positivesList" class="positives-list"></ul>
+          </details>
+
+          <div id="issuesContainer" class="issues-container"></div>
+
+          <button id="downloadReport" type="button" class="btn btn-soft download-report-btn" hidden>
+            Скачать отчёт (PDF)
+          </button>
+        </div>
+
+        <div id="offer" class="offer-box" style="display: none; opacity: 0" aria-live="polite">
+          <span id="offer-anchor" class="sr-only"></span>
+          <div class="offer-decoration" aria-hidden="true">
+            <img src="./images/offer-tg.svg" alt="" width="64" height="64" class="offer-deco-img">
+          </div>
+          <div class="offer-content">
+            <div class="offer-icon" aria-hidden="true">📋</div>
+            <div>
+              <h3>Нужно исправить документы?</h3>
+              <p>Напишите в Telegram — подскажем по 152-ФЗ и подготовим документы под ваш бизнес.</p>
+            </div>
+          </div>
+          <div class="offer-actions">
+            <a class="btn btn-tg" href="https://t.me/ВАША_ССЫЛКА" target="_blank" rel="noopener noreferrer">
+              <svg class="tg-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+              </svg>
+              Написать в Telegram
+            </a>
+            <a class="btn btn-soft offer-email" href="mailto:ВАШ_EMAIL@example.com">или по email</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section card cta-final fade-in">
+      <div>
+        <p class="eyebrow">Следующий шаг</p>
+        <h2>Документы по ПДн без сюрпризов от проверок</h2>
+        <p>Поможем привести политику, согласия и внутренние регламенты в порядок под вашу модель обработки данных.</p>
+      </div>
+      <div class="cta-final-actions">
+        <a class="btn btn-tg" href="https://t.me/ВАША_ССЫЛКА" target="_blank" rel="noopener noreferrer">
+          <svg class="tg-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+          </svg>
+          Telegram
+        </a>
+        <a class="btn btn-soft" href="mailto:ВАШ_EMAIL@example.com">Email</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer container">
+    <p>PDn Audit — сервис проверки документов по персональным данным (152-ФЗ). Аудит бесплатный; разработка комплекта документов — по запросу.</p>
+  </footer>
+
+  <script src="./app.js" defer></script>
 </body>
 </html>

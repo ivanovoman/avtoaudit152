@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="540" height="420" viewBox="0 0 540 420" fill="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#316bff" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.08"/>
+    </linearGradient>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#316bff" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <rect width="540" height="420" fill="url(#g1)" rx="24"/>
+  <!-- Laptop base -->
+  <g filter="url(#sh)">
+    <path fill="#e8efff" stroke="#c7d7f0" stroke-width="2" d="M120 260 L420 260 L440 290 L100 290 Z"/>
+    <rect x="130" y="120" width="280" height="170" rx="12" fill="#fff" stroke="#d6e0f1" stroke-width="2"/>
+    <rect x="145" y="138" width="250" height="120" rx="6" fill="#f3f7ff"/>
+    <!-- UI bars -->
+    <rect x="160" y="152" width="90" height="8" rx="4" fill="#316bff" opacity="0.35"/>
+    <rect x="160" y="168" width="180" height="6" rx="3" fill="#94a3b8" opacity="0.35"/>
+    <rect x="160" y="182" width="140" height="6" rx="3" fill="#94a3b8" opacity="0.25"/>
+    <!-- Floating cards -->
+    <rect x="360" y="80" width="120" height="72" rx="10" fill="#fff" stroke="#316bff" stroke-width="1.5" opacity="0.95"/>
+    <rect x="372" y="94" width="48" height="6" rx="3" fill="#316bff" opacity="0.5"/>
+    <rect x="372" y="108" width="96" height="5" rx="2" fill="#64748b" opacity="0.3"/>
+    <rect x="372" y="120" width="72" height="5" rx="2" fill="#64748b" opacity="0.2"/>
+    <rect x="60" y="100" width="100" height="56" rx="8" fill="#fff" stroke="#38bdf8" stroke-width="1.5" opacity="0.9"/>
+    <rect x="72" y="114" width="32" height="6" rx="3" fill="#38bdf8" opacity="0.45"/>
+    <rect x="72" y="128" width="76" height="4" rx="2" fill="#64748b" opacity="0.25"/>
+  </g>
+  <text x="270" y="360" text-anchor="middle" fill="#657493" font-family="system-ui,sans-serif" font-size="13" font-weight="600">152-$ · = · BGQB</text>
+</svg>
